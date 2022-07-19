@@ -35,11 +35,12 @@ game <- new.env()
 # 'pacman' state information
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pac <- list()
-pac$dir <- "rest"
-pac$dx     <- 0
-pac$dy     <- 0
-pac$row    <- 2
-pac$col    <- 2
+pac$dir      <- "rest"
+pac$next_dir <- "rest"
+pac$dx       <- 0
+pac$dy       <- 0
+pac$row      <- 2
+pac$col      <- 2
 
 game$pac <- pac
 
@@ -73,28 +74,84 @@ update_game <- function(event, frame_num, ...) {
 
   step <- ((frame_num - 1L) %% 8L) + 1L
   
-  # cat(step, " ")
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Monitor for keypress at every frame to ensure we don't miss it.
+  # and just stow the preferred "next direction"
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event) && event$type == 'key_press') {
+    if (event$str == 'Left') {
+      game$pac$next_dir <- 'left'
+    } else if (event$str == 'Right') {
+      game$pac$next_dir <- 'right'
+    } else if (event$str == 'Up') {
+      game$pac$next_dir <- 'up'
+    } else if (event$str == 'Down') {
+      game$pac$next_dir <- 'down'
+    }
+  }
+  
+  
   if (step == 1) {
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Eat the dot where the pacman is
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     matches <- (game$dots$y == game$pac$row & game$dots$x == game$pac$col)
     if (any(matches)) {
+      # Bump the score if a dot was consumed
       game$score <- game$score + 10
     }
     game$dots <- game$dots[!matches,, drop = FALSE]
-  
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # If pacman at a junction, then decide new direction
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (junction[32 - game$pac$row, game$pac$col]) {
-      game$pac$dir <- choose_direction(game$pac$row, game$pac$col, game$pac$dir)
-      if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
-      if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
-      if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
-      if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
-      {game$pac$dx = 0; game$pac$dy = 0}
+
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # if the 'next direction' is possible, make this the direction of pacman
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (game$pac$next_dir == 'left' && move_left[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'left'
+    } else if (game$pac$next_dir == 'right' && move_right[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'right'
+    } else if (game$pac$next_dir == 'up' && move_up[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'up'
+    } else if (game$pac$next_dir == 'down' && move_down[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'down'
     }
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # if the pacman's direction is not possible, then put him in 'rest' state
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (game$pac$dir == 'left' && !move_left[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'rest'
+    } else if (game$pac$dir == 'right' && !move_right[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'rest'
+    } else if (game$pac$dir == 'up' && !move_up[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'rest'
+    } else if (game$pac$dir == 'down' && !move_down[32 - game$pac$row, game$pac$col]) {
+      game$pac$dir <- 'rest'
+    }
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Inertia: next_dir always defaults to pacmans current direction
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # game$pac$next_dir <- game$pac$dir
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
+    if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
+    if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
+    if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
+    {game$pac$dx = 0; game$pac$dy = 0}
+    
+    # if (junction[32 - game$pac$row, game$pac$col]) {
+    #   game$pac$dir <- choose_direction(game$pac$row, game$pac$col, game$pac$dir)
+    #   if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
+    #   if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
+    #   if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
+    #   if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
+    #   {game$pac$dx = 0; game$pac$dy = 0}
+    # }
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # For each ghost:
@@ -115,7 +172,7 @@ update_game <- function(event, frame_num, ...) {
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Move pacman/ghosts from one location to the next in 8 steps
+  # Move pacman/ghosts from one location to the next in 8 steps.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   {
     # Copy blank board into our working buffer
@@ -141,29 +198,30 @@ update_game <- function(event, frame_num, ...) {
       x = game$pac$col * 8 - 11 + step * game$pac$dx,
       y = game$pac$row * 8 - 11 + step * game$pac$dy
     )
-
-    # Score
+    
+    # Show Score
     nr_text(board_nr, game$score, x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
     
-    # Lives remaining
+    # Show Lives remaining
     for (i in seq(game$lives)) {
       nr_blit(board_nr, pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8)
     }
     
-    # Draw everything to screen
+    # Render to screen
     grid.raster(board_nr)
   }
 
   if (step == 8L) {
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # After every 8th step, the sprite is at the next location.
     # Update pacman state to new row/col
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     game$pac$row <- game$pac$row + game$pac$dy
     game$pac$col <- game$pac$col + game$pac$dx
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Update ghost states to the new row/col
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for (i in seq_along(game$gh)) {
       game$gh[[i]]$row <- game$gh[[i]]$row + game$gh[[i]]$dy
       game$gh[[i]]$col <- game$gh[[i]]$col + game$gh[[i]]$dx
