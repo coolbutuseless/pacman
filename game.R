@@ -1,4 +1,10 @@
 
+
+if (FALSE) {
+  remotes::install_github('coolbutuseless/eventloop')
+  remotes::install_github('coolbutuseless/nara')
+}
+
 library(grid)
 library(nara)
 library(eventloop)
@@ -7,6 +13,11 @@ source("board.R")
 source("sprites.R")
 
 set.seed(1)
+
+# TODO:
+#  * double-check collision logic
+#  * sounds
+#  * WASD controls
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Given the row and column pick a random direction to move in
@@ -30,22 +41,22 @@ choose_direction <- function(row, col, current) {
 # Entire game state
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 game <- new.env()
+game$over <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 'pacman' state information
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-pac <- list()
-pac$dir      <- "rest"
-pac$next_dir <- "rest"
-pac$dx       <- 0
-pac$dy       <- 0
-pac$row      <- 2
-pac$col      <- 2
-
-game$pac <- pac
+game$pac <- list()
+game$pac$dir      <- "rest"
+game$pac$next_dir <- "rest"
+game$pac$dx       <- 0
+game$pac$dy       <- 0
+game$pac$row      <- 2
+game$pac$col      <- 2
 
 game$score <- 0
 game$lives <- 5
+game$last_collision <- -Inf
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Current dots in the scene
@@ -69,9 +80,12 @@ board_nr <- nr_duplicate(blank_board_nr)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 'heartbeat' eventloop callback function
+# This function is called every frame.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 update_game <- function(event, frame_num, ...) {
 
+  
   step <- ((frame_num - 1L) %% 8L) + 1L
   
   
@@ -102,7 +116,33 @@ update_game <- function(event, frame_num, ...) {
       game$score <- game$score + 10
     }
     game$dots <- game$dots[!matches,, drop = FALSE]
-
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Collison with ghosts?
+    # Give the user a 5 second "free time" after a collision where we don't 
+    # check again.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (frame_num - game$last_collision > 5*50) {
+      for (i in seq_along(game$gh)) {
+        if (
+          (game$gh[[i]]$row == game$pac$row && game$gh[[i]]$col == game$pac$col) ||
+          (game$gh[[i]]$row == game$pac$row + 1 && game$gh[[i]]$col == game$pac$col && 
+           game$gh[[i]]$dir == 'down' && game$pac$dir == 'up') ||
+          (game$gh[[i]]$row == game$pac$row - 1 && game$gh[[i]]$col == game$pac$col && 
+           game$gh[[i]]$dir == 'up' && game$pac$dir == 'down') ||
+          (game$gh[[i]]$row == game$pac$row && game$gh[[i]]$col == game$pac$col + 1 && 
+           game$gh[[i]]$dir == 'left' && game$pac$dir == 'right') ||
+          (game$gh[[i]]$row == game$pac$row && game$gh[[i]]$col == game$pac$col - 1 && 
+           game$gh[[i]]$dir == 'right' && game$pac$dir == 'left')
+        ) {
+          game$last_collision <- frame_num
+          game$lives <- game$lives - 1L
+          if (game$lives <= 0) {
+            game$over <- TRUE
+          }
+        }
+      }
+    }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # if the 'next direction' is possible, make this the direction of pacman
@@ -132,26 +172,13 @@ update_game <- function(event, frame_num, ...) {
     }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Inertia: next_dir always defaults to pacmans current direction
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # game$pac$next_dir <- game$pac$dir
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Decide on the deltax and deltay movement for the next 8 frames
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
     if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
     if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
     if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
     {game$pac$dx = 0; game$pac$dy = 0}
-    
-    # if (junction[32 - game$pac$row, game$pac$col]) {
-    #   game$pac$dir <- choose_direction(game$pac$row, game$pac$col, game$pac$dir)
-    #   if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
-    #   if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
-    #   if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
-    #   if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
-    #   {game$pac$dx = 0; game$pac$dy = 0}
-    # }
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # For each ghost:
@@ -192,19 +219,26 @@ update_game <- function(event, frame_num, ...) {
     }
 
     # Blit pacman into board
-    nr_blit(
-      board_nr,
-      pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]],
-      x = game$pac$col * 8 - 11 + step * game$pac$dx,
-      y = game$pac$row * 8 - 11 + step * game$pac$dy
-    )
+    if (!game$over) {
+      nr_blit(
+        board_nr,
+        pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]],
+        x = game$pac$col * 8 - 11 + step * game$pac$dx,
+        y = game$pac$row * 8 - 11 + step * game$pac$dy
+      )
+      
+      # Show Lives remaining
+      for (i in seq(game$lives)) {
+        nr_blit(board_nr, pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8)
+      }
+    }
     
     # Show Score
-    nr_text(board_nr, game$score, x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
+    nr_text(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
     
-    # Show Lives remaining
-    for (i in seq(game$lives)) {
-      nr_blit(board_nr, pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8)
+    if (game$over) {
+      nr_text(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+      nr_text(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
     }
     
     # Render to screen
@@ -216,8 +250,10 @@ update_game <- function(event, frame_num, ...) {
     # After every 8th step, the sprite is at the next location.
     # Update pacman state to new row/col
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    game$pac$row <- game$pac$row + game$pac$dy
-    game$pac$col <- game$pac$col + game$pac$dx
+    if (!game$over) {
+      game$pac$row <- game$pac$row + game$pac$dy
+      game$pac$col <- game$pac$col + game$pac$dx
+    }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Update ghost states to the new row/col
