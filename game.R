@@ -11,13 +11,19 @@ library(eventloop)
 
 source("board.R")
 source("sprites.R")
+source("sound.R")
 
 set.seed(1)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TODO:
-#  * double-check collision logic
-#  * sounds
-#  * WASD controls
+#  * Collision detection logic needs another look
+#  * I can't figure out how to reliably get audio::play() 
+#    to continually play the munch/chomp sound.  Seems to stutter too 
+#    much during playback.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Given the row and column pick a random direction to move in
@@ -41,7 +47,8 @@ choose_direction <- function(row, col, current) {
 # Entire game state
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 game <- new.env()
-game$over <- FALSE
+game$over     <- FALSE
+game$complete <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 'pacman' state information
@@ -94,13 +101,13 @@ update_game <- function(event, frame_num, ...) {
   # and just stow the preferred "next direction"
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event) && event$type == 'key_press') {
-    if (event$str == 'Left') {
+    if (event$str == 'Left' || event$str == 'a') {
       game$pac$next_dir <- 'left'
-    } else if (event$str == 'Right') {
+    } else if (event$str == 'Right' || event$str == 'd') {
       game$pac$next_dir <- 'right'
-    } else if (event$str == 'Up') {
+    } else if (event$str == 'Up' || event$str == 'w') {
       game$pac$next_dir <- 'up'
-    } else if (event$str == 'Down') {
+    } else if (event$str == 'Down' || event$str == 's') {
       game$pac$next_dir <- 'down'
     }
   }
@@ -114,15 +121,29 @@ update_game <- function(event, frame_num, ...) {
     if (any(matches)) {
       # Bump the score if a dot was consumed
       game$score <- game$score + 10
+      if (game$score %% 200 == 0) {
+        audio::play(sound$fruit)
+      }
+      if (game$score == 2880) {
+        game$over     <- TRUE
+        game$complete <- TRUE
+        audio::play(sound$inter)
+        Sys.sleep(5)
+      }
     }
     game$dots <- game$dots[!matches,, drop = FALSE]
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Collison with ghosts?
-    # Give the user a 5 second "free time" after a collision where we don't 
+    # Collision if:
+    #   * ghost + pacman on the same square
+    #   * ghost + pacman one square apart and headed towards each other
+    #       (this colliding in the middle of the 8-step move)
+    #
+    # Give the user a 3 second "free time" after a collision where we don't 
     # check again.
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (frame_num - game$last_collision > 5*50) {
+    if (!game$over && frame_num - game$last_collision > 3*50) {
       for (i in seq_along(game$gh)) {
         if (
           (game$gh[[i]]$row == game$pac$row && game$gh[[i]]$col == game$pac$col) ||
@@ -137,9 +158,13 @@ update_game <- function(event, frame_num, ...) {
         ) {
           game$last_collision <- frame_num
           game$lives <- game$lives - 1L
-          if (game$lives <= 0) {
+          if (game$lives == 0) {
             game$over <- TRUE
+            audio::play(sound$death)
+          } else {
+            audio::play(sound$ghost)
           }
+          break;
         }
       }
     }
@@ -196,7 +221,7 @@ update_game <- function(event, frame_num, ...) {
       }
     }
   }
-
+  
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Move pacman/ghosts from one location to the next in 8 steps.
@@ -237,14 +262,29 @@ update_game <- function(event, frame_num, ...) {
     nr_text(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
     
     if (game$over) {
-      nr_text(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
-      nr_text(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+      if (game$complete) {
+        nr_text(board_nr, "YOU ", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text(board_nr, "WON!", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+      } else {
+        nr_text(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+      }
     }
     
     # Render to screen
     grid.raster(board_nr)
   }
-
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Play intro music the first time the board is drawn
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (frame_num == 1) {
+    dev.flush()
+    audio::play(sound$intro)
+    Sys.sleep(4.5)
+  }
+  
+  
   if (step == 8L) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # After every 8th step, the sprite is at the next location.
@@ -263,8 +303,8 @@ update_game <- function(event, frame_num, ...) {
       game$gh[[i]]$col <- game$gh[[i]]$col + game$gh[[i]]$dx
     }
   }
-  
 }
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
