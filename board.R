@@ -141,8 +141,9 @@ if (FALSE) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a blank native raster for the board
 # 31 squares high. 28 squares wide
+# Extra space on top for score + lives
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-blank_board_nr <- nr_new(width = 28 * 8, height = 31 * 8, fill = 'black')
+blank_board_nr <- nr_new(width = 28 * 8, height = (31 + 2) * 8, fill = 'black')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Copy the appropriate maze piece into the board
@@ -186,8 +187,10 @@ dot_nr  <- nara::raster_to_nr(dot_mat)
 if (FALSE) {
   nr <- nr_duplicate(blank_board_nr)  
   nr_blit(nr, dot_nr, (dots$x - 0.5) * 8, (dots$y - 0.5) * 8)
+  dev.hold()
   grid.newpage()
-  grid.raster(nr, interpolate = FALSE)
+  grid.raster(nr, interpolate = FALSE); 
+  dev.flush()  
 }
 
 
@@ -211,7 +214,12 @@ moves <- list(
   down  = move_down 
 )
 
-junction <- (move_left | move_right) & (move_up | move_down) 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# matrix of junctions where ghosts can choose a new direction
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+junction <- (move_left | move_right) & (move_up | move_down) #&
+  # (move_left + move_right + move_up + move_down > 2)
 
 mode(move_left)  <- 'integer'
 mode(move_right) <- 'integer'
@@ -220,7 +228,7 @@ mode(move_down)  <- 'integer'
 mode(junction)   <- 'integer'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Plot junction locations where ghost/pacman movements may be changed
+# Plot junction locations where ghost movements may be changed
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   coords <- arrayInd(which(junction == 1), dim(junction))

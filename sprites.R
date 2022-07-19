@@ -38,7 +38,8 @@ pacman <- list(
   right = list(extract(1, 1), extract(1, 2), extract(1, 3), extract(1, 2)),
   left  = list(extract(2, 1), extract(2, 2), extract(1, 3), extract(2, 2)),
   up    = list(extract(3, 1), extract(3, 2), extract(1, 3), extract(3, 2)),
-  down  = list(extract(4, 1), extract(4, 2), extract(1, 3), extract(4, 2))
+  down  = list(extract(4, 1), extract(4, 2), extract(1, 3), extract(4, 2)),
+  rest  = list(extract(1, 3), extract(1, 3), extract(1, 3), extract(1, 3))
 )
 
 
@@ -85,5 +86,6 @@ ghost <- list(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   grid.raster(ghost4$right[[1]], interpolate = FALSE)
+  grid.newpage(); dev.hold(); grid.raster(pacman$rest[[2]], interpolate = FALSE); dev.flush()
 }
 

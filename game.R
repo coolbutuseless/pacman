@@ -8,8 +8,8 @@ source("sprites.R")
 # - turn antialiasing off (don't need it for pixel rendering)
 # - inibit storage of a displaylist. not needed.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# x11(type = 'dbcairo', antialias = 'none')
-# dev.control(displaylist = 'inhibit')
+x11(type = 'dbcairo', antialias = 'none', width = 7, height = 8)
+dev.control(displaylist = 'inhibit')
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +32,7 @@ choose_direction <- function(row, col, current) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 'pacman' state information
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-pacdir <- ""
+pacdir <- "rest"
 dx     <- 0
 dy     <- 0
 row    <- 2
@@ -49,8 +49,8 @@ cdots <- dots
 gh <- list(
   list(row = 14, col = 10, dx = 0, dy = 0, dir = "down"),
   list(row = 14, col = 19, dx = 0, dy = 0, dir = "down"),
-  list(row = 20, col = 10, dx = 0, dy = 0, dir = "down"),
-  list(row = 20, col = 19, dx = 0, dy = 0, dir = "down")
+  list(row = 17, col = 10, dx = 0, dy = 0, dir = "down"),
+  list(row = 17, col = 19, dx = 0, dy = 0, dir = "down")
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
