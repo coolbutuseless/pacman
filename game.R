@@ -58,8 +58,8 @@ game$pac$dir      <- "rest"
 game$pac$next_dir <- "rest"
 game$pac$dx       <- 0
 game$pac$dy       <- 0
-game$pac$row      <- 2
-game$pac$col      <- 2
+game$pac$row      <- 14
+game$pac$col      <- 15
 
 game$score <- 0
 game$lives <- 5
@@ -74,10 +74,10 @@ game$dots <- dots
 # Ghost state information. This will be updated during the game
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 game$gh <- list(
-  list(row = 14, col = 10, dx = 0, dy = 0, dir = "down"),
-  list(row = 14, col = 19, dx = 0, dy = 0, dir = "down"),
-  list(row = 17, col = 10, dx = 0, dy = 0, dir = "down"),
-  list(row = 17, col = 19, dx = 0, dy = 0, dir = "down")
+  list(row =  2, col =  2, dx = 0, dy = 0, dir = "down"),
+  list(row =  2, col = 27, dx = 0, dy = 0, dir = "down"),
+  list(row = 30, col =  2, dx = 0, dy = 0, dir = "down"),
+  list(row = 30, col = 27, dx = 0, dy = 0, dir = "down")
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
