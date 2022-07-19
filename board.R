@@ -189,3 +189,43 @@ if (FALSE) {
   grid.newpage()
   grid.raster(nr, interpolate = FALSE)
 }
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create matrices of allowable movements at each '.' location
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+roll_down  <- rbind(board[-1, ], rep(NA, 28)) 
+roll_up    <- rbind(rep(NA, 28), board[-nrow(board), ]) 
+roll_right <- cbind(board[,-1], rep(NA, 31))
+roll_left  <- cbind(rep(NA, 31), board[,-ncol(board)])
+
+move_left  <- board == '.' & roll_left  == '.'
+move_right <- board == '.' & roll_right == '.'
+move_up    <- board == '.' & roll_up    == '.'
+move_down  <- board == '.' & roll_down  == '.'
+
+moves <- list(
+  left  = move_left ,
+  right = move_right,
+  up    = move_up   ,
+  down  = move_down 
+)
+
+junction <- (move_left | move_right) & (move_up | move_down) 
+
+mode(move_left)  <- 'integer'
+mode(move_right) <- 'integer'
+mode(move_up)    <- 'integer'
+mode(move_down)  <- 'integer'
+mode(junction)   <- 'integer'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot junction locations where ghost/pacman movements may be changed
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (FALSE) {
+  coords <- arrayInd(which(junction == 1), dim(junction))
+  junction_nr <- nr_duplicate(blank_board_nr)
+  nr_rect(junction_nr, coords[,2]*8 - 3, (32 - coords[,1])*8 - 3, 2, 2, 'white')
+  grid.raster(junction_nr, interpolate = FALSE)
+}
+
