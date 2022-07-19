@@ -49,6 +49,7 @@ pac$col    <- 2
 game$pac <- pac
 
 game$score <- 0
+game$lives <- 5
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Current dots in the scene
@@ -73,7 +74,7 @@ board_nr <- nr_duplicate(blank_board_nr)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-for (i in 1:100) {
+for (i in 1:50) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Eat the dot where the pacman is
@@ -142,6 +143,14 @@ for (i in 1:100) {
       y = game$pac$row * 8 - 11 + step * game$pac$dy
     )
 
+    # Score
+    nr_text(board_nr, game$score, x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
+    
+    # Lives remaining
+    for (i in seq(game$lives)) {
+      nr_blit(board_nr, pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8)
+    }
+    
     # Draw everything to screen
     dev.hold()
     grid.raster(board_nr)
