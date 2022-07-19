@@ -27,10 +27,22 @@ your 5 pacman lives.
   ghost will take one of your lives.
 * The portal between the left and right side of the board has not been included.
   
+
+## Requirements
+
+**macOS**
+
+Running this on macOS requires [XQuartz](https://www.xquartz.org/) to have been 
+installed in order to support the `x11()` device.
+  
+**Linux**
+
+R needs to have been compiled with `x11()` and Cairo support.
+  
   
 ## Limitation - WindowsOS
 
-WindowsOS does not currently have support for the `onIdle` callback and 
+The WindowsOS version of R does not currently have support for the `onIdle` callback and 
 therefore does not support  event-driven interactive graphics as implemented 
 in the `{eventloop}` package.
 
