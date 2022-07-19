@@ -6,7 +6,7 @@ This is the full code for a pacman-style game in R.
 
 The game plays in realtime using 2 key packages:
 
-* [`{nara`}`](https://github.com/coolbutuseless/nara) for manipulation of
+* [`{nara}`](https://github.com/coolbutuseless/nara) for manipulation of
   *nativeRaster* images as a fast in-memory drawing canvas
 * [`{eventloop}`](https://github.com/coolbutuseless/eventloop) for event-driven
   interaction - allowing for keyboard feedback while rendering the game with
@@ -18,8 +18,14 @@ The game plays in realtime using 2 key packages:
   
 ## Controls
 
+The aim of this pacman-style game is to each all 288 dots before you lose
+your 5 pacman lives.
+
 * Run game with `source('game.R')`
 * Control pacman with arrow keys (or WASD)
+* There are no power-ups. Ghosts cannot die and every collision with a 
+  ghost will take one of your lives.
+* The portal between the left and right side of the board has not been included.
   
   
 ## Limitation - WindowsOS
