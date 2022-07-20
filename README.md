@@ -2,7 +2,7 @@
 
 # Pacman-style game in R
 
-This is the full code for a pacman-style game in R.
+This is the full code for a playable, pacman-style game in R.
 
 The game plays in realtime using 2 key packages:
 
@@ -18,14 +18,15 @@ The game plays in realtime using 2 key packages:
   
 ## Controls
 
-The aim of this pacman-style game is to each all 288 dots before you lose
+The aim of this pacman-style game is to eat all 288 dots before you lose
 your 5 pacman lives.
 
 * Run game with `source('game.R')`
 * Control pacman with arrow keys (or WASD)
-* There are no power-ups. Ghosts cannot die and every collision with a 
+* There are no power-ups. Ghosts cannot die. Every collision with a 
   ghost will take one of your lives.
-* The portal between the left and right side of the board has not been included.
+* The portal between the left and right side of the board, as present on a 
+  regular pacman game, is not included here.
   
 
 ## Requirements
@@ -50,6 +51,9 @@ in the `{eventloop}` package.
 to R itself, please get in touch!**
 
 ## Limitation - Flickering Cursor
+
+The cursor icon in an `{eventloop}` window will flicker because of some hard-coded
+behaviour in R's double-buffered `x11()` graphics device.
 
 `{eventloop}` makes use of the `x11()` graphics device with a double-buffered
 backend based on Cairo  (`x11(type = 'dbcairo')`).
