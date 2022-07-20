@@ -22,7 +22,10 @@ The aim of this pacman-style game is to eat all 288 dots before you lose
 your 5 pacman lives.
 
 * Run game with `source('game.R')`
-* Control pacman with arrow keys (or WASD)
+* Control pacman with arrow keys (or WASD).
+* Score 10 points for each dot consume.
+* Lose 100 points for every collision with a ghost.
+* Maximum possible score: 2880 for consume all dots and never colliding with a ghost.
 * There are no power-ups. Ghosts cannot die. Every collision with a 
   ghost will take one of your lives.
 * The portal between the left and right side of the board, as present on a 

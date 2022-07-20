@@ -158,6 +158,7 @@ update_game <- function(event, frame_num, ...) {
         ) {
           game$last_collision <- frame_num
           game$lives <- game$lives - 1L
+          game$score <- game$score - 100L
           if (game$lives == 0) {
             game$over <- TRUE
             audio::play(sound$death)
