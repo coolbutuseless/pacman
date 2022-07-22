@@ -118,20 +118,21 @@ update_game <- function(event, frame_num, ...) {
     # Eat the dot where the pacman is
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     matches <- (game$dots$y == game$pac$row & game$dots$x == game$pac$col)
+    game$dots <- game$dots[!matches,, drop = FALSE]
     if (any(matches)) {
       # Bump the score if a dot was consumed
       game$score <- game$score + 10
       if (game$score %% 200 == 0) {
         audio::play(sound$fruit)
       }
-      if (game$score == 2880) {
-        game$over     <- TRUE
-        game$complete <- TRUE
-        audio::play(sound$inter)
-        Sys.sleep(5)
-      }
     }
-    game$dots <- game$dots[!matches,, drop = FALSE]
+    
+    if (!game$over && nrow(game$dots) == 0) {
+      game$over     <- TRUE
+      game$complete <- TRUE
+      audio::play(sound$inter)
+      Sys.sleep(5)
+    }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Collison with ghosts?
