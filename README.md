@@ -32,6 +32,31 @@ your 5 pacman lives.
   regular pacman game, is not included here.
   
 
+## Installation
+
+1. Install the dependencies
+    * [`{nara}`](https://github.com/coolbutuseless/nara)
+    * [`{eventloop}`](https://github.com/coolbutuseless/eventloop)
+2. Retrieve the pacman game code from [github](https://github.com/coolbutless/pacman)
+    * Note that this is *not* a package, but just a collection of R scripts and
+      code.  This should make it easier to hack on, extend and adapt.
+
+
+```
+library(remotes)
+
+# Packages required for interactive rendering
+remotes::install_githb("coolbutuseless/eventloop")
+remotes::install_githb("coolbutuseless/nara")
+
+# Grab a copy of the pacman game code
+x <- remotes::remote_download(remotes::github_remote('coolbutuseless/pacman'))
+untar(x, exdir = 'pacman')
+setwd('pacman')
+source('game.R')
+```
+
+
 ## Requirements
 
 **macOS**
