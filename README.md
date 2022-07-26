@@ -46,13 +46,14 @@ your 5 pacman lives.
 library(remotes)
 
 # Packages required for interactive rendering
-remotes::install_githb("coolbutuseless/eventloop")
-remotes::install_githb("coolbutuseless/nara")
+remotes::install_github("coolbutuseless/eventloop")
+remotes::install_github("coolbutuseless/nara")
 
 # Grab a copy of the pacman game code
 x <- remotes::remote_download(remotes::github_remote('coolbutuseless/pacman'))
 untar(x, exdir = 'pacman')
 setwd('pacman')
+setwd(dir())
 source('game.R')
 ```
 
