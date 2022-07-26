@@ -40,18 +40,23 @@ your 5 pacman lives.
 2. Retrieve the pacman game code from [github](https://github.com/coolbutless/pacman)
     * Note that this is *not* a package, but just a collection of R scripts and
       code.  This should make it easier to hack on, extend and adapt.
-
+      
 
 ```
 library(remotes)
 
 # Packages required for interactive rendering
-remotes::install_githb("coolbutuseless/eventloop")
-remotes::install_githb("coolbutuseless/nara")
+remotes::install_github("coolbutuseless/eventloop")
+remotes::install_github("coolbutuseless/nara")
 
-# Grab a copy of the pacman game code
-x <- remotes::remote_download(remotes::github_remote('coolbutuseless/pacman'))
-untar(x, exdir = 'pacman')
+install.packages('audio')
+
+# Grab a copy of the pacman game code by cloning the repository
+system("git clone https://github.com/coolbutuseless/pacman.git")
+
+
+
+# Change into the source code directory and run
 setwd('pacman')
 source('game.R')
 ```
