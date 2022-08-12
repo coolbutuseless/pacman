@@ -6,7 +6,7 @@ library(nara)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the spritemap for pacman and the ghosts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-spritemap <- png::readPNG("image/game-sprites.png")
+spritemap <- png::readPNG(system.file("image/game-sprites.png", package = "pacman"))
 
 if (FALSE) {
   dim(spritemap)

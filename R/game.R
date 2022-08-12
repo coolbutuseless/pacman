@@ -1,18 +1,3 @@
-
-
-if (FALSE) {
-  remotes::install_github('coolbutuseless/eventloop')
-  remotes::install_github('coolbutuseless/nara')
-}
-
-library(grid)
-library(nara)
-library(eventloop)
-
-source("board.R")
-source("sprites.R")
-source("sound.R")
-
 # set.seed(1)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -274,7 +259,7 @@ update_game <- function(event, frame_num, ...) {
     }
     
     # Render to screen
-    grid.raster(board_nr)
+    grid::grid.raster(board_nr)
   }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -310,12 +295,10 @@ update_game <- function(event, frame_num, ...) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run the game within an event loop
+#' Run the game within an event loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-eventloop::run_loop(update_game, width = 7, height = 8, fps_target = 50)
-
-
-
-
-
-
+#' @import nara
+#' @export
+play <- function() {
+  eventloop::run_loop(update_game, width = 7, height = 8, fps_target = 50)
+}

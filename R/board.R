@@ -88,7 +88,7 @@ board <- matrix(board, nrow = 31, ncol = 28, byrow = TRUE)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Load the maze parts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-im <- suppressWarnings(png::readPNG("image/game-maze.png"))
+im <- suppressWarnings(png::readPNG(system.file("image/game-maze.png", package = "pacman")))
 if (FALSE) {
   dim(im)
   grid.raster(im)
