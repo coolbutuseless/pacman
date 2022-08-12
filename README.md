@@ -28,9 +28,6 @@ your 5 pacman lives.
 * Maximum possible score: 2880 for consume all dots and never colliding with a ghost.
 * There are no power-ups. Ghosts cannot die. Every collision with a 
   ghost will take one of your lives.
-* The portal between the left and right side of the board, as present on a 
-  regular pacman game, is not included here.
-  
 
 ## Installation
 

@@ -47,9 +47,9 @@ left <- c(
 "555556.41229.7", 
 "555556.46.....", 
 "555556.46.1222",
-"555556.79.4555",
-"555556....4555", # Middle
-"555556.13.4555", 
+"888889.79.4555",
+"..........4555", # Middle
+"888883.13.4555", 
 "555556.46.7888", 
 "555556.46.....",
 "555556.46.1222",
@@ -199,8 +199,8 @@ if (FALSE) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 roll_down  <- rbind(board[-1, ], rep(NA, 28)) 
 roll_up    <- rbind(rep(NA, 28), board[-nrow(board), ]) 
-roll_right <- cbind(board[,-1], rep(NA, 31))
-roll_left  <- cbind(rep(NA, 31), board[,-ncol(board)])
+roll_right <- cbind(board[,-1], board[,1])
+roll_left  <- cbind(board[,ncol(board)], board[,-ncol(board)])
 
 move_left  <- board == '.' & roll_left  == '.'
 move_right <- board == '.' & roll_right == '.'
