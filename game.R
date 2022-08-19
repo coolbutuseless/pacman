@@ -294,7 +294,7 @@ update_game <- function(event, frame_num, ...) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (!game$over) {
       game$pac$row <- game$pac$row + game$pac$dy
-      game$pac$col <- game$pac$col + game$pac$dx
+      game$pac$col <- (game$pac$col - 1 + game$pac$dx) %% 28 + 1
     }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -302,7 +302,7 @@ update_game <- function(event, frame_num, ...) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for (i in seq_along(game$gh)) {
       game$gh[[i]]$row <- game$gh[[i]]$row + game$gh[[i]]$dy
-      game$gh[[i]]$col <- game$gh[[i]]$col + game$gh[[i]]$dx
+      game$gh[[i]]$col <- (game$gh[[i]]$col - 1 + game$gh[[i]]$dx) %% 28 + 1
     }
   }
 }
