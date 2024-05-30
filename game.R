@@ -233,15 +233,15 @@ update_game <- function(event, frame_num, ...) {
     nr_copy_into(board_nr, blank_board_nr)
 
     # Blit current dots into board
-    nr_blit(board_nr, dot_nr, (game$dots$x - 0.5) * 8, (game$dots$y - 0.5) * 8)
+    nr_blit(board_nr, (game$dots$x - 0.5) * 8, (game$dots$y - 0.5) * 8, dot_nr)
 
     # Blit ghosts into board
     for (i in seq_along(game$gh)) {
       nr_blit(
         board_nr,
-        ghost[[i]][[game$gh[[i]]$dir]][[ bitwShiftR(step, 1L) %% 2 + 1L]],
         x = game$gh[[i]]$col * 8 - 11 + step * game$gh[[i]]$dx,
-        y = game$gh[[i]]$row * 8 - 11 + step * game$gh[[i]]$dy
+        y = game$gh[[i]]$row * 8 - 11 + step * game$gh[[i]]$dy,
+        ghost[[i]][[game$gh[[i]]$dir]][[ bitwShiftR(step, 1L) %% 2 + 1L]]
       )
     }
 
@@ -249,14 +249,14 @@ update_game <- function(event, frame_num, ...) {
     if (!game$over) {
       nr_blit(
         board_nr,
-        pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]],
         x = game$pac$col * 8 - 11 + step * game$pac$dx,
-        y = game$pac$row * 8 - 11 + step * game$pac$dy
+        y = game$pac$row * 8 - 11 + step * game$pac$dy,
+        pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]]
       )
       
       # Show Lives remaining
       for (i in seq(game$lives)) {
-        nr_blit(board_nr, pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8)
+        nr_blit(board_nr, x = (26 - 2*i) * 8, y = 31 * 8, pacman$right[[2]])
       }
     }
     

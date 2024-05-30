@@ -120,17 +120,17 @@ s <- lapply(s, nara::array_to_nr)
 # Create a montage of the maze pieces
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 nr <- nr_new(3*8 + 3, 3*8 + 3, fill = 'white')
-nr_blit(nr, s[[1]], 1 + 0 * 8 + 0, 1 + 2 * 8 + 2)
-nr_blit(nr, s[[2]], 1 + 1 * 8 + 1, 1 + 2 * 8 + 2)
-nr_blit(nr, s[[3]], 1 + 2 * 8 + 2, 1 + 2 * 8 + 2)
+nr_blit(nr, 1 + 0 * 8 + 0, 1 + 2 * 8 + 2, s[[1]])
+nr_blit(nr, 1 + 1 * 8 + 1, 1 + 2 * 8 + 2, s[[2]])
+nr_blit(nr, 1 + 2 * 8 + 2, 1 + 2 * 8 + 2, s[[3]])
 
-nr_blit(nr, s[[4]], 1 + 0 * 8 + 0, 1 + 1 * 8 + 1)
-nr_blit(nr, s[[5]], 1 + 1 * 8 + 1, 1 + 1 * 8 + 1)
-nr_blit(nr, s[[6]], 1 + 2 * 8 + 2, 1 + 1 * 8 + 1)
+nr_blit(nr, 1 + 0 * 8 + 0, 1 + 1 * 8 + 1, s[[4]])
+nr_blit(nr, 1 + 1 * 8 + 1, 1 + 1 * 8 + 1, s[[5]])
+nr_blit(nr, 1 + 2 * 8 + 2, 1 + 1 * 8 + 1, s[[6]])
 
-nr_blit(nr, s[[7]], 1 + 0 * 8 + 0, 1 + 0 * 8 + 0)
-nr_blit(nr, s[[8]], 1 + 1 * 8 + 1, 1 + 0 * 8 + 0)
-nr_blit(nr, s[[9]], 1 + 2 * 8 + 2, 1 + 0 * 8 + 0)
+nr_blit(nr, 1 + 0 * 8 + 0, 1 + 0 * 8 + 0, s[[7]])
+nr_blit(nr, 1 + 1 * 8 + 1, 1 + 0 * 8 + 0, s[[8]])
+nr_blit(nr, 1 + 2 * 8 + 2, 1 + 0 * 8 + 0, s[[9]])
 
 if (FALSE) {
   grid.newpage()
@@ -153,7 +153,7 @@ for (row in 1:31) {
     val <- board[31 + 1 - row, col]
     if (val != '.') {
       idx <- as.integer(val)
-      nr_blit(blank_board_nr, s[[idx]], (col - 1) * 8 + 1, (row - 1) * 8 + 1)
+      nr_blit(blank_board_nr, (col - 1) * 8 + 1, (row - 1) * 8 + 1, s[[idx]])
     }
   }
 }
@@ -186,7 +186,7 @@ dot_nr  <- nara::raster_to_nr(dot_mat)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   nr <- nr_duplicate(blank_board_nr)  
-  nr_blit(nr, dot_nr, (dots$x - 0.5) * 8, (dots$y - 0.5) * 8)
+  nr_blit(nr, (dots$x - 0.5) * 8, (dots$y - 0.5) * 8, dot_nr)
   dev.hold()
   grid.newpage()
   grid.raster(nr, interpolate = FALSE); 
