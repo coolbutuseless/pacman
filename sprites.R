@@ -6,7 +6,8 @@ library(nara)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the spritemap for pacman and the ghosts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-spritemap <- png::readPNG("image/game-sprites.png")
+# spritemap <- png::readPNG("image/game-sprites.png")
+sm <- fastpng::read_png("image/game-sprites.png", type = 'nativeraster')
 
 if (FALSE) {
   dim(spritemap)
@@ -16,7 +17,7 @@ if (FALSE) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Extract a sprite from the spritemap
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-extract <- function(row, col) {
+extract_old <- function(row, col) {
   sprite <- spritemap[1 + (row-1)*16 + 0:15, 457 + (col-1)*16 + 0:15,]
   
   alpha <- sprite[,,1] == 1 | sprite[,,2] == 1 | sprite[,,3] == 1 
@@ -30,6 +31,17 @@ extract <- function(row, col) {
   nara::array_to_nr(new)
 }
 
+extract <- function(row, col) {
+  sprite <- nara::nr_crop(sm, 456 + (col-1)*16, (row-1)*16, 16, 16)
+  nara::nr_replace(sprite, -16777216L, 0L) # replace 'black' with 'transparent'
+  sprite
+}
+
+
+if (FALSE) {
+  extract (5, 2) |> plot(T)
+  extract2(5, 2) |> plot(T)
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract pacman sprites
@@ -78,7 +90,10 @@ ghost4 <- list(
 # Combine all ghosts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ghost <- list(
-  ghost1, ghost2, ghost3, ghost4
+  ghost1 = ghost1, 
+  ghost2 = ghost2, 
+  ghost3 = ghost3, 
+  ghost4 = ghost4
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,6 +101,17 @@ ghost <- list(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   grid.raster(ghost4$right[[1]], interpolate = FALSE)
-  grid.newpage(); dev.hold(); grid.raster(pacman$rest[[2]], interpolate = FALSE); dev.flush()
+  grid.newpage(); dev.hold(); grid.raster(pacman$left[[1]], interpolate = FALSE); dev.flush()
 }
+
+
+
+
+
+
+
+
+
+
+
 

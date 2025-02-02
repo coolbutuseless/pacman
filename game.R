@@ -2,7 +2,7 @@
 
 if (FALSE) {
   remotes::install_github('coolbutuseless/eventloop')
-  remotes::install_github('coolbutuseless/nara')
+  remotes::install_github('coolbutuseless/nara')  # >= 0.1.1.9035
 }
 
 library(grid)
@@ -13,7 +13,8 @@ source("board.R")
 source("sprites.R")
 source("sound.R")
 
-# set.seed(1)
+play_sound <- FALSE
+set.seed(1)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,7 +37,7 @@ choose_direction <- function(row, col, current) {
   remove <- which(reverse == current)
   idxs <- setdiff(1:4, remove)
   for (i in sample(idxs)) {
-    if (moves[[i]][32 - row, col]) break
+    if (moves[[i]][row, col]) break
   }
   dirs[i]
 }
@@ -58,7 +59,7 @@ game$pac$dir      <- "rest"
 game$pac$next_dir <- "rest"
 game$pac$dx       <- 0
 game$pac$dy       <- 0
-game$pac$row      <- 14
+game$pac$row      <- 12
 game$pac$col      <- 15
 
 game$score <- 0
@@ -122,7 +123,7 @@ update_game <- function(event, frame_num, ...) {
     if (any(matches)) {
       # Bump the score if a dot was consumed
       game$score <- game$score + 10
-      if (game$score %% 200 == 0) {
+      if (isTRUE(play_sound) && game$score %% 200 == 0) {
         audio::play(sound$fruit)
       }
     }
@@ -130,8 +131,10 @@ update_game <- function(event, frame_num, ...) {
     if (!game$over && nrow(game$dots) == 0) {
       game$over     <- TRUE
       game$complete <- TRUE
-      audio::play(sound$inter)
-      Sys.sleep(5)
+      if (isTRUE(play_sound)) {
+        audio::play(sound$inter)
+        Sys.sleep(5)
+      }
     }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,9 +165,9 @@ update_game <- function(event, frame_num, ...) {
           game$score <- game$score - 100L
           if (game$lives == 0) {
             game$over <- TRUE
-            audio::play(sound$death)
+            if (isTRUE(play_sound)) audio::play(sound$death)
           } else {
-            audio::play(sound$ghost)
+            if (isTRUE(play_sound)) audio::play(sound$ghost)
           }
           break;
         }
@@ -174,13 +177,13 @@ update_game <- function(event, frame_num, ...) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # if the 'next direction' is possible, make this the direction of pacman
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (game$pac$next_dir == 'left' && move_left[32 - game$pac$row, game$pac$col]) {
+    if (game$pac$next_dir == 'left' && move_left[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'left'
-    } else if (game$pac$next_dir == 'right' && move_right[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$next_dir == 'right' && move_right[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'right'
-    } else if (game$pac$next_dir == 'up' && move_up[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$next_dir == 'up' && move_up[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'up'
-    } else if (game$pac$next_dir == 'down' && move_down[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$next_dir == 'down' && move_down[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'down'
     }
     
@@ -188,13 +191,13 @@ update_game <- function(event, frame_num, ...) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # if the pacman's direction is not possible, then put him in 'rest' state
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (game$pac$dir == 'left' && !move_left[32 - game$pac$row, game$pac$col]) {
+    if (game$pac$dir == 'left' && !move_left[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'rest'
-    } else if (game$pac$dir == 'right' && !move_right[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$dir == 'right' && !move_right[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'rest'
-    } else if (game$pac$dir == 'up' && !move_up[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$dir == 'up' && !move_up[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'rest'
-    } else if (game$pac$dir == 'down' && !move_down[32 - game$pac$row, game$pac$col]) {
+    } else if (game$pac$dir == 'down' && !move_down[game$pac$row, game$pac$col]) {
       game$pac$dir <- 'rest'
     }
     
@@ -203,8 +206,8 @@ update_game <- function(event, frame_num, ...) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (game$pac$dir == 'left' ) {game$pac$dx = -1; game$pac$dy =  0} else
     if (game$pac$dir == 'right') {game$pac$dx =  1; game$pac$dy =  0} else
-    if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy =  1} else
-    if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy = -1} else
+    if (game$pac$dir == 'up'   ) {game$pac$dx =  0; game$pac$dy = -1} else
+    if (game$pac$dir == 'down' ) {game$pac$dx =  0; game$pac$dy =  1} else
     {game$pac$dx = 0; game$pac$dy = 0}
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -212,13 +215,13 @@ update_game <- function(event, frame_num, ...) {
     #  - if at a junction, choose a random new direction
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for (i in seq_along(game$gh)) {
-      if (junction[32 - game$gh[[i]]$row, game$gh[[i]]$col]) {
+      if (junction[game$gh[[i]]$row, game$gh[[i]]$col]) {
         dir <- choose_direction(game$gh[[i]]$row, game$gh[[i]]$col, game$gh[[i]]$dir)
         game$gh[[i]]$dir <- dir
         if (dir == 'left' ) {game$gh[[i]]$dx = -1; game$gh[[i]]$dy =  0} else
         if (dir == 'right') {game$gh[[i]]$dx =  1; game$gh[[i]]$dy =  0} else
-        if (dir == 'up'   ) {game$gh[[i]]$dx =  0; game$gh[[i]]$dy =  1} else
-        if (dir == 'down' ) {game$gh[[i]]$dx =  0; game$gh[[i]]$dy = -1} else
+        if (dir == 'up'   ) {game$gh[[i]]$dx =  0; game$gh[[i]]$dy = -1} else
+        if (dir == 'down' ) {game$gh[[i]]$dx =  0; game$gh[[i]]$dy =  1} else
         {game$gh[[i]]$dx = 0; game$gh[[i]]$dy = 0}
       }
     }
@@ -233,43 +236,47 @@ update_game <- function(event, frame_num, ...) {
     nr_copy_into(board_nr, blank_board_nr)
 
     # Blit current dots into board
-    nr_blit(board_nr, (game$dots$x - 0.5) * 8, (game$dots$y - 0.5) * 8, dot_nr)
+    nr_blit(dst = board_nr, src = dot_nr, (game$dots$x - 0.5) * 8, (game$dots$y - 0.5) * 8,
+            hjust = 0, vjust = 0)
 
     # Blit ghosts into board
     for (i in seq_along(game$gh)) {
       nr_blit(
-        board_nr,
-        x = game$gh[[i]]$col * 8 - 11 + step * game$gh[[i]]$dx,
-        y = game$gh[[i]]$row * 8 - 11 + step * game$gh[[i]]$dy,
-        ghost[[i]][[game$gh[[i]]$dir]][[ bitwShiftR(step, 1L) %% 2 + 1L]]
+        dst = board_nr,
+        src = ghost[[i]][[game$gh[[i]]$dir]][[ bitwShiftR(step, 1L) %% 2 + 1L]],
+        x   = game$gh[[i]]$col * 8 - 11 + step * game$gh[[i]]$dx,
+        y   = game$gh[[i]]$row * 8 - 11 + step * game$gh[[i]]$dy,
+        hjust = 0, vjust = 0
       )
     }
 
     # Blit pacman into board
     if (!game$over) {
       nr_blit(
-        board_nr,
+        dst = board_nr,
+        src = pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]],
         x = game$pac$col * 8 - 11 + step * game$pac$dx,
         y = game$pac$row * 8 - 11 + step * game$pac$dy,
-        pacman[[game$pac$dir]][[ bitwShiftR(step, 1L) %% 4 + 1L]]
+        hjust = 0, vjust = 0
       )
       
       # Show Lives remaining
       for (i in seq(game$lives)) {
-        nr_blit(board_nr, x = (26 - 2*i) * 8, y = 31 * 8, pacman$right[[2]])
+        nr_blit(dst = board_nr, src = pacman$right[[2]], x = (26 - 2*i) * 8, y = 31 * 8,
+                hjust = 0, vjust = 0)
       }
     }
     
     # Show Score
-    nr_text(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 31 * 8, 'white', fontsize = 16)
+    nr_text_basic(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 33 * 8, 'white', fontsize = 16)
     
     if (game$over) {
       if (game$complete) {
-        nr_text(board_nr, "YOU ", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
-        nr_text(board_nr, "WON!", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+        nr_text_basic(board_nr, "YOU ", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text_basic(board_nr, "WON!", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
       } else {
-        nr_text(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
-        nr_text(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+        nr_text_basic(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text_basic(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
       }
     }
     
@@ -282,8 +289,12 @@ update_game <- function(event, frame_num, ...) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (frame_num == 1) {
     dev.flush()
-    audio::play(sound$intro)
-    Sys.sleep(4.5)
+    if (isTRUE(play_sound)) {
+      audio::play(sound$intro)
+      Sys.sleep(4.5)
+    } else {
+      Sys.sleep(1)
+    }
   }
   
   

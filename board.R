@@ -88,53 +88,46 @@ board <- matrix(board, nrow = 31, ncol = 28, byrow = TRUE)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Load the maze parts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-im <- suppressWarnings(png::readPNG("image/game-maze.png"))
+sm <- fastpng::read_png("image/game-maze.png", type = 'nativeraster')
+# im <- suppressWarnings(png::readPNG("image/game-maze.png"))
 if (FALSE) {
   dim(im)
   grid.raster(im)
+  
+  plot(sm, TRUE)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Parse out the maze sprites
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 s <- vector('list', 9)
-row <- 1; col <- 7; s[[1]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 1; col <- 5; s[[2]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 1; col <- 6; s[[3]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
 
-row <- 1; col <- 8; s[[4]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 2; col <-12; s[[5]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 1; col <- 9; s[[6]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-
-row <- 1; col <-11; s[[7]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 1; col <- 5; s[[8]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-row <- 1; col <-10; s[[9]] <- im[28 + row*9 + 0:7, 226 + col*9 + 0:7,]
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Convert from array to nativeraster
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-s <- lapply(s, nara::array_to_nr)
-
+row <- 1; col <- 7; s[[1]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <- 5; s[[2]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <- 6; s[[3]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <- 8; s[[4]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 2; col <-12; s[[5]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <- 9; s[[6]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <-11; s[[7]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <- 5; s[[8]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
+row <- 1; col <-10; s[[9]] <- nr_crop(sm, 225 + col*9, 27 + row*9, 8, 8)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a montage of the maze pieces
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-nr <- nr_new(3*8 + 3, 3*8 + 3, fill = 'white')
-nr_blit(nr, 1 + 0 * 8 + 0, 1 + 2 * 8 + 2, s[[1]])
-nr_blit(nr, 1 + 1 * 8 + 1, 1 + 2 * 8 + 2, s[[2]])
-nr_blit(nr, 1 + 2 * 8 + 2, 1 + 2 * 8 + 2, s[[3]])
-
-nr_blit(nr, 1 + 0 * 8 + 0, 1 + 1 * 8 + 1, s[[4]])
-nr_blit(nr, 1 + 1 * 8 + 1, 1 + 1 * 8 + 1, s[[5]])
-nr_blit(nr, 1 + 2 * 8 + 2, 1 + 1 * 8 + 1, s[[6]])
-
-nr_blit(nr, 1 + 0 * 8 + 0, 1 + 0 * 8 + 0, s[[7]])
-nr_blit(nr, 1 + 1 * 8 + 1, 1 + 0 * 8 + 0, s[[8]])
-nr_blit(nr, 1 + 2 * 8 + 2, 1 + 0 * 8 + 0, s[[9]])
+nr <- nr_new(3*8 + 4, 3*8 + 4, fill = 'white')
+nr_blit(dst = nr, src = s[[1]], x = 1 + 0 * 8 + 0, y = 1 + 2 * 8 + 2, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[2]], x = 1 + 1 * 8 + 1, y = 1 + 2 * 8 + 2, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[3]], x = 1 + 2 * 8 + 2, y = 1 + 2 * 8 + 2, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[4]], x = 1 + 0 * 8 + 0, y = 1 + 1 * 8 + 1, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[5]], x = 1 + 1 * 8 + 1, y = 1 + 1 * 8 + 1, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[6]], x = 1 + 2 * 8 + 2, y = 1 + 1 * 8 + 1, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[7]], x = 1 + 0 * 8 + 0, y = 1 + 0 * 8 + 0, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[8]], x = 1 + 1 * 8 + 1, y = 1 + 0 * 8 + 0, vjust = 0, hjust = 0)
+nr_blit(dst = nr, src = s[[9]], x = 1 + 2 * 8 + 2, y = 1 + 0 * 8 + 0, vjust = 0, hjust = 0)
 
 if (FALSE) {
-  grid.newpage()
-  grid.raster(nr, interpolate = FALSE)
+  plot(nr, T)
 }
 
 
@@ -150,10 +143,11 @@ blank_board_nr <- nr_new(width = 28 * 8, height = (31 + 2) * 8, fill = 'black')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 for (row in 1:31) {
   for (col in 1:28) {
-    val <- board[31 + 1 - row, col]
+    val <- board[row, col]
     if (val != '.') {
       idx <- as.integer(val)
-      nr_blit(blank_board_nr, (col - 1) * 8 + 1, (row - 1) * 8 + 1, s[[idx]])
+      nr_blit(dst = blank_board_nr, src = , s[[idx]], x = (col - 1) * 8 + 1, y = (row - 1) * 8 + 1,
+              hjust = 0, vjust = 0)
     }
   }
 }
@@ -162,15 +156,13 @@ for (row in 1:31) {
 # Draw the blank board
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
-  grid.newpage()
-  grid.raster(blank_board_nr, interpolate = FALSE)
+  plot(blank_board_nr, TRUE)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dots <- arrayInd(which(board == '.'), dim(board))
-dots[,1] <- 32 - dots[,1] # flip y
 dots <- as.data.frame(dots)
 names(dots) <- c('y', 'x')
 
@@ -178,18 +170,16 @@ names(dots) <- c('y', 'x')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a 2x2 pixel nativeraster to represented the dot onscreen
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dot_mat <- matrix(rep('white', 4), 2, 2)
-dot_nr  <- nara::raster_to_nr(dot_mat)
+dot_nr  <- nara::nr_new(2, 2, 'white')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Test drawing the dots over the blank board
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   nr <- nr_duplicate(blank_board_nr)  
-  nr_blit(nr, (dots$x - 0.5) * 8, (dots$y - 0.5) * 8, dot_nr)
+  nr_blit(dst = nr, src = dot_nr, x = (dots$x - 0.5) * 8, y = (dots$y - 0.5) * 8, hjust = 0, vjust = 0)
   dev.hold()
-  grid.newpage()
-  grid.raster(nr, interpolate = FALSE); 
+  plot(nr, TRUE)
   dev.flush()  
 }
 
@@ -233,7 +223,9 @@ mode(junction)   <- 'integer'
 if (FALSE) {
   coords <- arrayInd(which(junction == 1), dim(junction))
   junction_nr <- nr_duplicate(blank_board_nr)
-  nr_rect(junction_nr, coords[,2]*8 - 3, (32 - coords[,1])*8 - 3, 2, 2, 'white')
-  grid.raster(junction_nr, interpolate = FALSE)
+  nr_rect(junction_nr, coords[,2]*8 - 3, (coords[,1])*8 - 3, 2, 2, 'white')
+  plot(junction_nr, TRUE)
 }
+
+
 
