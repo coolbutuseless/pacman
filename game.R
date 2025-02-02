@@ -3,11 +3,13 @@
 if (FALSE) {
   remotes::install_github('coolbutuseless/eventloop')
   remotes::install_github('coolbutuseless/nara')  # >= 0.1.1.9035
+  install.packages('fastpng')
 }
 
 library(grid)
 library(nara)
 library(eventloop)
+library(fastpng)
 
 source("board.R")
 source("sprites.R")
