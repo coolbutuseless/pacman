@@ -176,7 +176,7 @@ dot_nr  <- nara::nr_new(2, 2, 'white')
 # Test drawing the dots over the blank board
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
-  nr <- nr_duplicate(blank_board_nr)  
+  nr <- nr_copy(blank_board_nr)  
   nr_blit(dst = nr, src = dot_nr, x = (dots$x - 0.5) * 8, y = (dots$y - 0.5) * 8, hjust = 0, vjust = 0)
   dev.hold()
   plot(nr, TRUE)
@@ -222,7 +222,7 @@ mode(junction)   <- 'integer'
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (FALSE) {
   coords <- arrayInd(which(junction == 1), dim(junction))
-  junction_nr <- nr_duplicate(blank_board_nr)
+  junction_nr <- nr_copy(blank_board_nr)
   nr_rect(junction_nr, coords[,2]*8 - 3, (coords[,1])*8 - 3, 2, 2, 'white')
   plot(junction_nr, TRUE)
 }

@@ -33,7 +33,7 @@ extract_old <- function(row, col) {
 
 extract <- function(row, col) {
   sprite <- nara::nr_crop(sm, 456 + (col-1)*16, (row-1)*16, 16, 16)
-  nara::nr_replace(sprite, -16777216L, 0L) # replace 'black' with 'transparent'
+  nara::nr_color_replace(sprite, -16777216L, 0L) # replace 'black' with 'transparent'
   sprite
 }
 
