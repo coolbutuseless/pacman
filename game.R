@@ -270,15 +270,15 @@ update_game <- function(event, frame_num, ...) {
     }
     
     # Show Score
-    nr_text_basic(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 33 * 8, 'white', fontsize = 16)
+    nr_text_mono(board_nr, paste0("SCORE: ", game$score), x = 2 * 8, y = 33 * 8, 'white', fontsize = 16)
     
     if (game$over) {
       if (game$complete) {
-        nr_text_basic(board_nr, "YOU ", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
-        nr_text_basic(board_nr, "WON!", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+        nr_text_mono(board_nr, "YOU ", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text_mono(board_nr, "WON!", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
       } else {
-        nr_text_basic(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
-        nr_text_basic(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
+        nr_text_mono(board_nr, "GAME", x = 12 * 8, y = 16.5 * 8, 'white', fontsize = 16)
+        nr_text_mono(board_nr, "OVER", x = 12 * 8, y = 14.5 * 8, 'white', fontsize = 16)
       }
     }
     
